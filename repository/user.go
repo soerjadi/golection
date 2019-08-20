@@ -2,7 +2,7 @@ package repository
 
 import "github.com/soerjadi/golection/domain"
 
-// UserRepository represent repository of user
+// UserRepository interface
 type UserRepository interface {
 	GetByID(id int64) (*domain.User, error)
 	GetList(offset int32, limit int32) ([]*domain.User, error)

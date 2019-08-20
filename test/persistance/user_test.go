@@ -1,4 +1,4 @@
-package persitance_test
+package persistance_test
 
 import (
 	"reflect"

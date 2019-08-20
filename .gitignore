@@ -2,3 +2,5 @@
 .idea
 .env
 .idea_modules/
+node_modules/
+*.lock

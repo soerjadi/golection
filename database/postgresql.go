@@ -17,7 +17,7 @@ func RDB() Database {
 
 // DB implementation database connection
 func (d Impl) DB() *sql.DB {
-	if err := godotenv.Load("../.env"); err == nil {
+	if err := godotenv.Load(os.ExpandEnv("$GOPATH/src/github.com/soerjadi/golection/.env")); err != nil {
 		panic("Error loading .env file")
 	}
 

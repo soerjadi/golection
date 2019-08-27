@@ -19,35 +19,58 @@ func UserRepositoryWithRDB(conn *sql.DB) repository.UserRepository {
 
 // GetByID get user by id
 func (repo *UserRepositoryImpl) GetByID(id int64) (*domain.User, error) {
-	row := repo.Conn.QueryRow("select * from users where id=$1", id)
-
-	user := &domain.User{}
-	err := row.Scan(&user.ID, &user.Username, &user.Fullname, &user.Passhash, &user.IdentityNumber, &user.IsVoted, &user.Role, &user.Loginable)
+	row, err := repo.queryRow("select * from users where id=$1", id)
 
 	if err != nil {
 		return nil, err
 	}
+
+	user := &domain.User{}
+	err = row.Scan(&user.ID, &user.Username, &user.Fullname, &user.Passhash, &user.IdentityNumber, &user.IsVoted, &user.Role, &user.Loginable)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// GetByEmail get user by email
+func (repo *UserRepositoryImpl) GetByEmail(email string) (*domain.User, error) {
+	row, err := repo.queryRow("select * from users where email=$1", email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user := &domain.User{}
+	err = row.Scan(&user.ID, &user.Username, &user.Fullname, &user.Passhash, &user.IdentityNumber, &user.IsVoted, &user.Role, &user.Loginable)
 
 	return user, nil
 }
 
 // GetByIdentityID get user by identity ID
 func (repo *UserRepositoryImpl) GetByIdentityID(id int64) (*domain.User, error) {
-	row := repo.Conn.QueryRow("select * from users where identity_number=$1", id)
-
-	user := &domain.User{}
-	err := row.Scan(&user.ID, &user.Username, &user.Fullname, &user.Passhash, &user.IdentityNumber, &user.IsVoted, &user.Role, &user.Loginable)
+	row, err := repo.queryRow("select * from users where identity_number=$1", id)
 
 	if err != nil {
 		return nil, err
 	}
+
+	user := &domain.User{}
+	err = row.Scan(&user.ID, &user.Username, &user.Fullname, &user.Passhash, &user.IdentityNumber, &user.IsVoted, &user.Role, &user.Loginable)
 
 	return user, nil
 }
 
 // GetList get user list
 func (repo *UserRepositoryImpl) GetList(offset int32, limit int32) ([]*domain.User, error) {
-	rows, err := repo.Conn.Query("select * from users limit $1 offset $2", limit, offset)
+	rows, err := repo.query("select * from users limit $1 offset $2", limit, offset)
+	// rows, err := repo.Conn.Query("select * from users limit $1 offset $2", limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
 
 	users := make([]*domain.User, 0)
 	for rows.Next() {
@@ -119,4 +142,26 @@ func (repo *UserRepositoryImpl) Delete(id int64) error {
 	_, err = stmt.Exec(id)
 
 	return err
+}
+
+func (repo *UserRepositoryImpl) query(q string, args ...interface{}) (*sql.Rows, error) {
+	stmt, err := repo.Conn.Prepare(q)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer stmt.Close()
+
+	return stmt.Query(args...)
+}
+
+func (repo *UserRepositoryImpl) queryRow(q string, args ...interface{}) (*sql.Row, error) {
+	stmt, err := repo.Conn.Prepare(q)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	return stmt.QueryRow(args...), nil
 }

@@ -10,10 +10,5 @@ type UserRepository interface {
 	Delete(id int64) error
 	Update(user *domain.User) (*domain.User, error)
 	GetByIdentityID(id int64) (*domain.User, error)
+	GetByEmail(email string) (*domain.User, error)
 }
-
-// AdminRole role user
-const AdminRole = 1
-
-// UserRole role for user
-const UserRole = 2
